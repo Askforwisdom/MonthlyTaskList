@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #333;
+      --secondary: #888;
+      --border: #eee;
+      --bg: #fafafa;
+      --card: #fff;
+      --hover: #f5f5f5;
+      --success: #4caf50;
+      --danger: #e53935;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--primary);
+      font-size: 14px;
+    }
+
+    .titlebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: var(--card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .titlebar-drag {
+      flex: 1;
+      height: 100%;
+      -webkit-app-region: drag;
+    }
+
+    .titlebar-controls {
+      display: flex;
+      height: 100%;
+    }
+
+    .titlebar-btn {
+      width: 46px;
+      height: 100%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--secondary);
+      transition: background 0.15s;
+    }
+
+    .titlebar-btn:hover {
+      background: var(--hover);
+    }
+
+    .titlebar-btn.close:hover {
+      background: #e81123;
+      color: white;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-top: 48px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: absolute;
+      left: 0;
+    }
+
+    .header-right {
+      position: absolute;
+      right: 0;
+    }
+
+    .add-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--primary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .add-btn:hover {
+      background: var(--hover);
+      border-color: var(--primary);
+    }
+
+    .month-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .month-nav {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--secondary);
+      transition: all 0.15s;
+    }
+
+    .month-nav:hover {
+      background: var(--hover);
+      color: var(--primary);
+    }
+
+    .current-month {
+      font-size: 16px;
+      font-weight: 500;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .icon-btn:hover {
+      background: var(--hover);
+      color: var(--primary);
+    }
+
+    .menu-dropdown {
+      position: relative;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 36px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      min-width: 200px;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .dropdown-content.active {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dropdown-item:hover {
+      background: var(--hover);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    .dropdown-label {
+      color: var(--secondary);
+      font-size: 11px;
+      padding: 8px 14px 4px;
+      text-transform: uppercase;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background: var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(16px);
+    }
+
+    .task-list {
+      background: var(--card);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      cursor: context-menu;
+      position: relative;
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-item:hover {
+      background: var(--hover);
+    }
+
+    .task-checkbox {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-text {
+      font-size: 14px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .task-completed .task-text {
+      text-decoration: line-through;
+      color: var(--secondary);
+    }
+
+    .task-completion {
+      display: none;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+      font-size: 12px;
+      color: var(--secondary);
+    }
+
+    .task-item:hover .task-completion {
+      display: block;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--secondary);
+      font-size: 13px;
+    }
+
+    .context-menu {
+      display: none;
+      position: fixed;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      min-width: 100px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .context-menu.active {
+      display: block;
+    }
+
+    .context-menu-item {
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+
+    .context-menu-item:hover {
+      background: var(--hover);
+    }
+
+    .context-menu-item.danger {
+      color: var(--danger);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      padding: 16px 16px 0;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .modal-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .modal-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 16px 16px;
+    }
+
+    .btn-secondary {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: var(--hover);
+    }
+
+    .btn-primary {
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.85;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.2s;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <div class="titlebar-drag"></div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn" id="btn-minimize">─</button>
+      <button class="titlebar-btn close" id="btn-close">✕</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <button class="add-btn" id="add-task-btn" title="新增任务">+</button>
+      </div>
+      <div class="month-section">
+        <button class="month-nav" id="prev-month">‹</button>
+        <div class="current-month" id="current-month"></div>
+        <button class="month-nav" id="next-month">›</button>
+      </div>
+      <div class="header-right">
+        <div class="menu-dropdown">
+          <button class="icon-btn" id="menu-btn">⋮</button>
+          <div class="dropdown-content" id="menu-dropdown">
+            <div class="dropdown-label">启动选项</div>
+            <div class="dropdown-item">
+              <span>开机自启</span>
+              <div class="toggle-switch" id="autostart-toggle"></div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">数据</div>
+            <div class="dropdown-item" id="export-btn">导出数据</div>
+            <div class="dropdown-item" id="import-btn">导入数据</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="task-list" id="task-list">
+      <div class="empty-state">暂无任务</div>
+    </section>
+  </div>
+
+  <div class="context-menu" id="context-menu">
+    <div class="context-menu-item" id="context-edit">编辑</div>
+    <div class="context-menu-item danger" id="context-delete">删除</div>
+  </div>
+
+  <div class="modal-overlay" id="add-task-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">新增任务</h3>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="modal-input" id="new-task-input" placeholder="输入任务内容">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancel-add-task">取消</button>
+        <button class="btn-primary" id="confirm-add-task">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="completion-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">完成说明</h3>
+      </div>
+      <div class="modal-body">
+        <textarea class="modal-textarea" id="completion-text" placeholder="记录完成情况..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancel-completion">取消</button>
+        <button class="btn-primary" id="save-completion">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="edit-task-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">编辑任务</h3>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="modal-input" id="edit-task-input" placeholder="输入任务内容">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancel-edit-task">取消</button>
+        <button class="btn-primary" id="save-edit-task">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>
