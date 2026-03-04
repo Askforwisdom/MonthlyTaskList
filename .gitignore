@@ -10,6 +10,7 @@ settings.json
 
 # Build script (local config)
 打包.bat
+build.bat
 
 # OS files
 .DS_Store

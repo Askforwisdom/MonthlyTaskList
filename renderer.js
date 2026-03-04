@@ -246,6 +246,14 @@ function handleContextEdit() {
 function openEditTaskModal(task) {
   currentEditingTaskId = task.id;
   document.getElementById('edit-task-input').value = task.text;
+  const completionInput = document.getElementById('edit-completion-input');
+  if (task.completed) {
+    completionInput.value = task.completion || '';
+    completionInput.style.display = 'block';
+  } else {
+    completionInput.value = '';
+    completionInput.style.display = 'none';
+  }
   document.getElementById('edit-task-modal').classList.add('active');
   document.getElementById('edit-task-input').focus();
 }
@@ -253,13 +261,15 @@ function openEditTaskModal(task) {
 function closeEditTaskModal() {
   document.getElementById('edit-task-modal').classList.remove('active');
   document.getElementById('edit-task-input').value = '';
+  document.getElementById('edit-completion-input').value = '';
   currentEditingTaskId = null;
 }
 
 async function saveEditTask() {
   if (!currentEditingTaskId) return;
-  const input = document.getElementById('edit-task-input');
-  const newText = input.value.trim();
+  const taskInput = document.getElementById('edit-task-input');
+  const completionInput = document.getElementById('edit-completion-input');
+  const newText = taskInput.value.trim();
   if (!newText) {
     showToast('请输入任务内容', 'error');
     return;
@@ -269,6 +279,9 @@ async function saveEditTask() {
   if (taskIndex === -1) return;
   
   tasks[taskIndex].text = newText;
+  if (tasks[taskIndex].completed) {
+    tasks[taskIndex].completion = completionInput.value.trim();
+  }
   try {
     const { year, month } = getCurrentMonthKey();
     const result = await api.invoke('save-tasks', year, month, tasks);

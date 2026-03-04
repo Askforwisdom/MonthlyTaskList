@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win --x64 --dir"
+    "build": "electron-builder --win --x64"
   },
   "keywords": [
     "task",
@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "com.tasklist.desktop",
-    "productName": "月度任务清单",
+    "productName": "MonthlyTaskList",
     "directories": {
       "output": "dist"
     },
@@ -32,7 +32,22 @@
       "renderer.js"
     ],
     "win": {
-      "target": "dir"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "sign": null,
+      "signingHashAlgorithms": []
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "MonthlyTaskList"
     },
     "asar": true
   }
